@@ -53,13 +53,12 @@ const setUsers = {
   },
   //регистрация
   signUp(email, password, handler){
-    if(this.user === null){
+    if(!email.trim() || !password.trim()){
       return alert('Введите данные')
     }
 
     if(!this.getUser(email)){
-      const user = {email,password, displayName: email}
-      console.log(user);
+      const user = {email,password, displayName: email.split('@')[0]}
 
       listUsers.push(user)
       this.authorizedUser(user)
@@ -120,8 +119,5 @@ toggleAuthDom()
 
 
 
-// let wemail = "lina.mitry96@gmail.com"
 
-// let wdisplayName = wemail.match(/[-.\w]+/i)
-// console.log(wdisplayName);
 
