@@ -16,7 +16,7 @@ const emailInput = document.querySelector('.login-email')
 const passwordInput = document.querySelector('.login-password')
 const loginSignUp = document.querySelector('.login-signup')
 
-const userElement = document.querySelector('.user')
+const userElem = document.querySelector('.user')
 const userNameElement = document.querySelector('.user-name')
 
 
@@ -52,24 +52,22 @@ const setUsers = {
     console.log('выход')
   },
   //регистрация
-  signUp(email, password){
+  signUp(email, password, handler){
+    if(this.user === null){
+      return alert('Введите данные')
+    }
+
     if(!this.getUser(email)){
-      listUsers.push({email,password, displayName: email})
-      console.log(listUsers)
+      const user = {email,password, displayName: email}
+      console.log(user);
+
+      listUsers.push(user)
+      this.authorizedUser(user)
+      handler()
     } else {
       alert('Пользователь с таким email уже зарегистрирован')
     }
   },
-  // getUser(email){
-  //   let user = null
-  //   for (let i = 0; i < listUsers.length; i++) {
-  //     if(listUsers[i].email === email){
-  //       user = listUsers[i]
-  //       break
-  //     }      
-  //   }
-  //   return user
-  // }
   getUser(email){
     return listUsers.find(item => item.email === email)
   },
@@ -86,7 +84,7 @@ const toggleAuthDom = ()=>{
   if(user){
     loginElem.style.display = 'none'
     userElem.style.display = ''
-    userNameElement = user.displayName
+    userNameElement.textContent = user.displayName
   } else {
     loginElem.style.display = ''
     userElem.style.display = 'none'
@@ -99,12 +97,31 @@ const toggleAuthDom = ()=>{
 //submit type
 loginForm.addEventListener('submit', (event) => {
   event.preventDefault()//изменить поведение браузера по умолчанию
-  setUsers.logIn(emailInput.value, passwordInput.value)
+  setUsers.logIn(emailInput.value, passwordInput.value, toggleAuthDom)
+  loginForm.reset()
 })
 
 loginSignUp.addEventListener('click', (event) => {
   event.preventDefault()
-  setUsers.signUp(emailInput.value, passwordInput.value)
+  setUsers.signUp(emailInput.value, passwordInput.value, toggleAuthDom)
+  loginForm.reset()
 })
 
 toggleAuthDom()
+
+
+
+
+
+
+
+
+
+
+
+
+// let wemail = "lina.mitry96@gmail.com"
+
+// let wdisplayName = wemail.match(/[-.\w]+/i)
+// console.log(wdisplayName);
+
