@@ -9,6 +9,7 @@ menuToggle.addEventListener('click', function (event) {
   // вешаем класс на меню, когда кликнули по кнопке меню 
   menu.classList.toggle('visible');
 })
+const regExpValidEmail = /^\w+@\w+\.\w{2,}$/
 
 const loginElem = document.querySelector('.login')
 const loginForm = document.querySelector('.login-form')
@@ -18,6 +19,15 @@ const loginSignUp = document.querySelector('.login-signup')
 
 const userElem = document.querySelector('.user')
 const userNameElement = document.querySelector('.user-name')
+
+const exitElem = document.querySelector('.exit')
+const editElem = document.querySelector('.edit')
+const editContainer = document.querySelector('.edit-container')
+
+const editUsername = document.querySelector('.edit-username')
+const editPhotoURL = document.querySelector('.edit-photo')
+const userAvatarElem = document.querySelector('.user-avatar')
+
 
 
 const listUsers = [
@@ -39,20 +49,25 @@ const listUsers = [
 const setUsers = {
   user: null,
   // вход
-  logIn(email, password){
+  logIn(email, password, handler){
+    if(!regExpValidEmail.test(email)) return alert('email не валиден')
     const user = this.getUser(email)
     if(user && user.password === password){
       this.authorizedUser(user)
+      handler()
     }else{
       alert('Пользователь с такими данными не найден')
     }
   },
   // выход
-  logOut(){
+  logOut(handler){
     console.log('выход')
+    this.user = null
+    handler()
   },
   //регистрация
   signUp(email, password, handler){
+    if(!regExpValidEmail.test(email)) return alert('email не валиден')
     if(!email.trim() || !password.trim()){
       return alert('Введите данные')
     }
@@ -72,8 +87,19 @@ const setUsers = {
   },
   authorizedUser(user){
     this.user = user
+  },
+  editUser(userName, userPhoto, handler){
+    if(userName){
+      this.user.displayName = userName
+    }
+    if(userPhoto){
+      this.user.photo = userPhoto
+    }
+    handler()
   }
 }
+
+
 
 
 const toggleAuthDom = ()=>{
@@ -84,6 +110,7 @@ const toggleAuthDom = ()=>{
     loginElem.style.display = 'none'
     userElem.style.display = ''
     userNameElement.textContent = user.displayName
+    userAvatarElem.src = user.photo || userAvatarElem.src
   } else {
     loginElem.style.display = ''
     userElem.style.display = 'none'
@@ -104,6 +131,22 @@ loginSignUp.addEventListener('click', (event) => {
   event.preventDefault()
   setUsers.signUp(emailInput.value, passwordInput.value, toggleAuthDom)
   loginForm.reset()
+})
+
+exitElem.addEventListener('click',event=>{
+  event.preventDefault()
+  setUsers.logOut(toggleAuthDom)
+})
+
+editElem.addEventListener('click', event =>{
+  event.preventDefault()
+  editContainer.classList.toggle('visible')
+})
+
+editContainer.addEventListener('click', event =>{
+  event.preventDefault()
+
+  setUsers.editUser(editUsername.value, editPhotoURL.value, toggleAuthDom)
 })
 
 toggleAuthDom()

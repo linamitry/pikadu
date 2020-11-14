@@ -94,6 +94,9 @@ body {
   align-items: flex-start;
   justify-content: space-between;
 }
+.add-post {
+  width: 67%;
+}
 .posts {
   width: 67%;
 }
@@ -387,6 +390,9 @@ body {
   justify-content: center;
   width: 100%;
   margin-top: 20px;
+}
+.button-new-post.visible {
+  display: flex;
 }
 .icon-fire {
   fill: #fff;
