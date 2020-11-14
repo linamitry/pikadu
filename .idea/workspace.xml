@@ -19,8 +19,7 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="51a77aea-1ab0-4997-a41f-b08037a764aa" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/img/edit.svg" afterDir="false" />
+    <list default="true" id="51a77aea-1ab0-4997-a41f-b08037a764aa" name="Default Changelist" comment="changed">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/css/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/build/css/style.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/css/style.css.map" beforeDir="false" afterPath="$PROJECT_DIR$/build/css/style.css.map" afterDir="false" />
@@ -33,6 +32,9 @@
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Pull.Settings">
+    <option name="BRANCH" value="dev" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
@@ -69,7 +71,8 @@
       <updated>1605210657407</updated>
       <workItem from="1605210659075" duration="289000" />
       <workItem from="1605211103464" duration="2872000" />
-      <workItem from="1605215838367" duration="6298000" />
+      <workItem from="1605215838367" duration="6997000" />
+      <workItem from="1605364175189" duration="5730000" />
     </task>
     <servers />
   </component>
@@ -88,10 +91,22 @@
     </option>
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="changed" />
+    <option name="LAST_COMMIT_MESSAGE" value="changed" />
+  </component>
   <component name="WindowStateProjectService">
     <state x="1268" y="285" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1605216917158">
       <screen x="0" y="23" width="1792" height="1017" />
     </state>
     <state x="1268" y="285" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.23.1792.1017@0.23.1792.1017" timestamp="1605216917157" />
+    <state x="496" y="300" key="Vcs.Push.Dialog.v2" timestamp="1605372812810">
+      <screen x="0" y="0" width="1792" height="1120" />
+    </state>
+    <state x="496" y="300" key="Vcs.Push.Dialog.v2/0.0.1792.1120@0.0.1792.1120" timestamp="1605372812810" />
+    <state x="561" y="251" width="670" height="676" key="search.everywhere.popup" timestamp="1605371496775">
+      <screen x="0" y="0" width="1792" height="1120" />
+    </state>
+    <state x="561" y="251" width="670" height="676" key="search.everywhere.popup/0.0.1792.1120@0.0.1792.1120" timestamp="1605371496775" />
   </component>
 </project>

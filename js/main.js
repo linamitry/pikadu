@@ -18,6 +18,7 @@ const editPhotoURL = document.querySelector('.edit-photo')
 const userAvatarElem = document.querySelector('.user-avatar')
 const postsWrapper = document.querySelector('.posts')
 const buttonNewPost = document.querySelector('.button-new-post')
+const addPostElem = document.querySelector('.add-post')
 
 
 
@@ -62,7 +63,25 @@ const setPosts = {
       like: 42,
       comments: 24
     }
-  ]
+  ],
+  addPost(title,text,tags,handler){
+    this.allPosts.unshift({
+      title,
+      text,
+      tags: tags.split(',').map(item => item.trim()),
+      author: {
+        displayName: setUsers.user.displayName,
+        photo: setUsers.user.photo
+      },
+      date: new Date().toLocaleString(),
+      like: 0,
+      comments: 0,
+    })
+
+    if(handler){
+      hsndler()
+    }
+  }
 }
 
 
@@ -144,13 +163,23 @@ const toggleAuthDom = ()=>{
     userNameElement.textContent = user.displayName
     userAvatarElem.src = user.photo || userAvatarElem.src
     buttonNewPost.classList.add('visible')
+
   } else {
     loginElem.style.display = ''
     userElem.style.display = 'none'
     buttonNewPost.classList.remove('visible')
+    addPostElem.classList.remove('visible')
+    postsWrapper.classList.add('visible')
+    //todo удалить
+    addPostElem.classList.add('visible')
+    postsWrapper.classList.remove('visible')
   }
 }
 
+const showAddPost = () => {
+  addPostElem.classList.add('visible')
+  postsWrapper.classList.remove('visible')
+}
 
 
 
@@ -204,7 +233,12 @@ const showAllPosts = () => {
     `
   })
   postsWrapper.innerHTML = postsHTML
+
+  addPostElem.classList.remove('visible')
+  postsWrapper.classList.add('visible')
 }
+
+
 
 const init = () => {
 //события на форме(войти и enter) и на регистрации
@@ -242,10 +276,38 @@ editContainer.addEventListener('submit', event =>{
 // отслеживаем клик по кнопке меню и запускаем функцию 
 menuToggle.addEventListener('click', function (event) {
   // отменяем стандартное поведение ссылки
-  event.preventDefault();
+  event.preventDefault()
   // вешаем класс на меню, когда кликнули по кнопке меню 
-  menu.classList.toggle('visible');
+  menu.classList.toggle('visible')
 })
+
+buttonNewPost.addEventListener('click', event => {
+  event.preventDefault()
+  showAddPost()
+
+})
+
+addPostElem.addEventListener('submit', event => {
+  event.preventDefault()
+  const {title,text,tags} = addPostElem.elements
+
+  if(title.value.length<6){
+    alert('Добавьте символы в заголовок')
+    return
+  }
+  if(text.value.length<50){
+    alert('Добавьте символы в текст')
+    return
+  }
+
+setPosts.addPost(title.value, text.value, tags.value, showAddPost())
+addPostElem.classList.remove('visible')
+
+
+
+})
+
+
 
   showAllPosts()
   toggleAuthDom()
