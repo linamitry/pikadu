@@ -1,3 +1,18 @@
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyAdgKTo3nGsgLmgxRUJDi7k5_c_W_dutbM",
+  authDomain: "pikadu-5839e.firebaseapp.com",
+  databaseURL: "https://pikadu-5839e.firebaseio.com",
+  projectId: "pikadu-5839e",
+  storageBucket: "pikadu-5839e.appspot.com",
+  messagingSenderId: "394524754809",
+  appId: "1:394524754809:web:0c3bd7c87f2d1c3399a5a8"
+};
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+
+
+
 let menuToggle = document.querySelector('#menu-toggle');
 let menu = document.querySelector('.sidebar');
 
@@ -20,137 +35,117 @@ const postsWrapper = document.querySelector('.posts')
 const buttonNewPost = document.querySelector('.button-new-post')
 const addPostElem = document.querySelector('.add-post')
 
+const default_photo = userAvatarElem.src
 
-
-
-const listUsers = [
-  {
-    id: '01',
-    email: 'maks@mail.com',
-    password: '12345',
-    displayName: 'MaksJS'
-  },
-  {
-    id: '02',
-    email: 'lina@mail.com',
-    password: '123456',
-    displayName: 'LinaJS'
-  },
-];
 
 
 const setPosts = {
-  allPosts: [
-    {
-      title: 'Заголовок поста',
-      text: 'Далеко-далеко за словесными горами в стране гласных и согласных живут рыбные тексты. Языком что рот маленький реторический вершину текстов обеспечивает гор свой назад решила сбить маленькая дорогу жизни рукопись ему букв деревни предложения, ручеек залетают продолжил парадигматическая? Но языком сих пустился, запятой своего его снова решила меня вопроса моей своих пояс коварный, власти диких правилами напоивший они текстов ipsum первую подпоясал? Лучше, щеке подпоясал приставка большого курсивных на берегу своего? Злых, составитель агентство что вопроса ведущими о решила одна алфавит!',
-      tags: [
-        'свежее', 'новое', 'горячее', 'мое', 'случайность',
-      ],
-      author: {displayName: 'maks', photo: ''},
-      date: '11.11.2020, 20:54:00',
-      like: 34,
-      comments: 54
-    },
-    {
-      title: 'Заголовок поста 2',
-      text: 'Далеко-далеко за словесными горами в стране гласных и согласных живут рыбные тексты. Языком что рот маленький реторический вершину текстов обеспечивает гор свой назад решила сбить маленькая дорогу жизни рукопись ему букв деревни предложения, ручеек залетают продолжил парадигматическая? Но языком сих пустился, запятой своего его снова решила меня вопроса моей своих пояс коварный, власти диких правилами напоивший они текстов ipsum первую подпоясал? Лучше, щеке подпоясал приставка большого курсивных на берегу своего? Злых, составитель агентство что вопроса ведущими о решила одна алфавит!',
-      tags: [
-        'свежее', 'новое', 'мое', 'случайность',
-      ],
-      author: {displayName: 'lina', photo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQt86sQ9Ya33SIwiA1tc4FGlpq1jqhimI_XVw&usqp=CAU'},
-      date: '10.11.2020, 20:54:00',
-      like: 42,
-      comments: 24
-    }
-  ],
+  allPosts: [],
+
   addPost(title,text,tags,handler){
+    const user = firebase.auth().currentUser
     this.allPosts.unshift({
+      id: `postID${(+new Date()).toString(16)}-${user.uid}`,
       title,
       text,
       tags: tags.split(',').map(item => item.trim()),
       author: {
         displayName: setUsers.user.displayName,
-        photo: setUsers.user.photo
+        photo: setUsers.user.photoURL
       },
       date: new Date().toLocaleString(),
       like: 0,
       comments: 0,
     })
-
-    if(handler){
-      hsndler()
-    }
+  firebase.database().ref('post').set(this.allPosts)
+  .then(() => this.getPosts(handler))
+  },
+  getPosts(handler) {
+    firebase.database().ref('post').on('value', snapshot => {
+      this.allPosts = snapshot.val() || []
+      handler()
+    })
   }
 }
 
-
-
-//setUsers.logIn()
 const setUsers = {
   user: null,
-  // вход
+  initUser(handler){
+    firebase.auth().onAuthStateChanged(user => {
+      user ? this.user = user : this.user = null
+      if(handler) handler()
+    })
+  },
+  
   logIn(email, password, handler){
-
-    if(!regExpValidEmail.test(email)) return alert('email не валиден')
-    const user = this.getUser(email)    
-    if(user && user.password === password){
-      this.authorizedUser(user)
-      handler()
-    }else    {
-      alert('Пользователь с такими данными не найден')
-    }
+    firebase.auth()
+      .signInWithEmailAndPassword(email, password)
+      .then(data => this.user = data.user)
+      .then(handler)
+      .catch(err => {
+        const errCode = err.code
+        const errMessage = err.message
+        alert(errMessage)
+      })
   },
 
-  // выход
-  logOut(handler){
-
-    console.log('выход')
-    this.user = null
-    handler()
+  logOut(){
+    firebase.auth().signOut()
   },
 
-  //регистрация
   signUp(email, password, handler){
-
     if(!regExpValidEmail.test(email)) return alert('email не валиден')
     if(!email.trim() || !password.trim()){
       return alert('Введите данные')
     }
-    if(!this.getUser(email)){
-      const user = {email,password, displayName: email.substring(0, email.indexOf('@'))}
-      listUsers.push(user)
-      this.authorizedUser(user)
-      handler()
-    } else {
-      alert('Пользователь с таким email уже зарегистрирован')
-    }
+    firebase.auth()
+      .createUserWithEmailAndPassword(email, password)
+      .then(data=>{
+        this.editUser(email.substring(0, email.indexOf('@')), null, handler)
+      })
+      .catch(err=>{
+        const errCode = err.code
+        const errMessage = err.message
+        alert(errMessage)        
+      });
   },
 
-
-
-
-  getUser(email){
-
-    return listUsers.find(item => item.email === email)
-  },
-  authorizedUser(user){
-
-    this.user = user
-  },
-  editUser(userName, userPhoto, handler){
-
-    if(userName){
-      this.user.displayName = userName
+//TODO:переделать чтобы св-во фото не вызывалось, если не передано
+  editUser(displayName, photoURL, handler){
+    const user = firebase.auth().currentUser
+    if(displayName){
+      if(photoURL){
+        user.updateProfile({
+          displayName,
+          photoURL
+        }).then(handler)
+      } else{
+      user.updateProfile({
+        displayName
+      }).then(handler)
+QA
     }
-    if(userPhoto){
-      this.user.photo = userPhoto
-    }
-    handler()
+  }, 
+
+  sendForget(email){
+    firebase.auth().sendPasswordResetEmail(email)
+      .then(() => {
+        alert('Письмо отправлено')
+      })
+      .catch(err => {
+        console.log(err)
+      })
   }
 }
 
+const loginForget = document.querySelector('.login-forget')
 
+loginForget.addEventListener('click', event =>{
+  event.preventDefault()
+
+  setUsers.sendForget(emailInput.value)
+  emailInput.value = ''
+})
 
 
 const toggleAuthDom = ()=>{
@@ -161,7 +156,7 @@ const toggleAuthDom = ()=>{
     loginElem.style.display = 'none'
     userElem.style.display = ''
     userNameElement.textContent = user.displayName
-    userAvatarElem.src = user.photo || userAvatarElem.src
+    userAvatarElem.src = user.photoURL || default_photo
     buttonNewPost.classList.add('visible')
 
   } else {
@@ -170,9 +165,6 @@ const toggleAuthDom = ()=>{
     buttonNewPost.classList.remove('visible')
     addPostElem.classList.remove('visible')
     postsWrapper.classList.add('visible')
-    //todo удалить
-    addPostElem.classList.add('visible')
-    postsWrapper.classList.remove('visible')
   }
 }
 
@@ -181,10 +173,7 @@ const showAddPost = () => {
   postsWrapper.classList.remove('visible')
 }
 
-
-
 const showAllPosts = () => {
-
   let postsHTML = ''
   setPosts.allPosts.forEach(({title, text, tags, author, date, like, comments})=>{    
     postsHTML += `
@@ -241,9 +230,6 @@ const showAllPosts = () => {
 
 
 const init = () => {
-//события на форме(войти и enter) и на регистрации
-//addEventListener вместо onclick (отменять removeEventListener)
-//submit type
 loginForm.addEventListener('submit', (event) => {
   event.preventDefault()//изменить поведение браузера по умолчанию
   setUsers.logIn(emailInput.value, passwordInput.value, toggleAuthDom)
@@ -258,7 +244,7 @@ loginSignUp.addEventListener('click', (event) => {
 
 exitElem.addEventListener('click',event=>{
   event.preventDefault()
-  setUsers.logOut(toggleAuthDom)
+  setUsers.logOut()
 })
 
 editElem.addEventListener('click', event =>{
@@ -273,23 +259,21 @@ editContainer.addEventListener('submit', event =>{
   editContainer.classList.remove('visible')
 })
 
-// отслеживаем клик по кнопке меню и запускаем функцию 
 menuToggle.addEventListener('click', function (event) {
-  // отменяем стандартное поведение ссылки
   event.preventDefault()
-  // вешаем класс на меню, когда кликнули по кнопке меню 
   menu.classList.toggle('visible')
 })
 
 buttonNewPost.addEventListener('click', event => {
   event.preventDefault()
   showAddPost()
-
 })
 
 addPostElem.addEventListener('submit', event => {
   event.preventDefault()
-  const {title,text,tags} = addPostElem.elements
+  console.dir(addPostElem)
+  const { title, text, tags } = addPostElem.elements
+  console.log(title.value);
 
   if(title.value.length<6){
     alert('Добавьте символы в заголовок')
@@ -299,18 +283,14 @@ addPostElem.addEventListener('submit', event => {
     alert('Добавьте символы в текст')
     return
   }
+ 
+ setPosts.addPost(title.value, text.value, tags.value, showAddPost)
 
-setPosts.addPost(title.value, text.value, tags.value, showAddPost())
-addPostElem.classList.remove('visible')
-
-
-
+ addPostElem.classList.remove('visible')
+ addPostElem.reset()
 })
-
-
-
-  showAllPosts()
-  toggleAuthDom()
+setPosts.getPosts(showAllPosts)
+setUsers.initUser(toggleAuthDom)
 }
 
 document.addEventListener('DOMContentLoaded', init)
