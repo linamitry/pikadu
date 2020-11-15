@@ -1,3 +1,18 @@
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyAdgKTo3nGsgLmgxRUJDi7k5_c_W_dutbM",
+  authDomain: "pikadu-5839e.firebaseapp.com",
+  databaseURL: "https://pikadu-5839e.firebaseio.com",
+  projectId: "pikadu-5839e",
+  storageBucket: "pikadu-5839e.appspot.com",
+  messagingSenderId: "394524754809",
+  appId: "1:394524754809:web:0c3bd7c87f2d1c3399a5a8"
+};
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+
+
+
 let menuToggle = document.querySelector('#menu-toggle');
 let menu = document.querySelector('.sidebar');
 
@@ -18,6 +33,7 @@ const editPhotoURL = document.querySelector('.edit-photo')
 const userAvatarElem = document.querySelector('.user-avatar')
 const postsWrapper = document.querySelector('.posts')
 const buttonNewPost = document.querySelector('.button-new-post')
+const addPostElem = document.querySelector('.add-post')
 
 
 
@@ -62,7 +78,25 @@ const setPosts = {
       like: 42,
       comments: 24
     }
-  ]
+  ],
+  addPost(title,text,tags,handler){
+    this.allPosts.unshift({
+      title,
+      text,
+      tags: tags.split(',').map(item => item.trim()),
+      author: {
+        displayName: setUsers.user.displayName,
+        photo: setUsers.user.photo
+      },
+      date: new Date().toLocaleString(),
+      like: 0,
+      comments: 0,
+    })
+
+    if(handler){
+      handler()
+    }
+  }
 }
 
 
@@ -70,6 +104,12 @@ const setPosts = {
 //setUsers.logIn()
 const setUsers = {
   user: null,
+  initUser(handler){
+    firebase.auth().onAuthStateChanged(user => {
+      user ? this.user = user : this.user = null
+      if(handler) handler()
+    })
+  },
   // вход
   logIn(email, password, handler){
 
@@ -98,14 +138,30 @@ const setUsers = {
     if(!email.trim() || !password.trim()){
       return alert('Введите данные')
     }
-    if(!this.getUser(email)){
-      const user = {email,password, displayName: email.substring(0, email.indexOf('@'))}
-      listUsers.push(user)
-      this.authorizedUser(user)
-      handler()
-    } else {
-      alert('Пользователь с таким email уже зарегистрирован')
-    }
+
+
+    firebase.auth()
+      .createUserWithEmailAndPassword(email, password)
+      .then(data=>{
+        console.log('data: ', data);       
+      })
+      .catch(err=>{
+        const errCode = err.code
+        const errMessage = err.message
+        alert(errMessage)        
+      });
+
+
+
+     
+    // if(!this.getUser(email)){
+    //   const user = {email,password, displayName: email.substring(0, email.indexOf('@'))}
+    //   listUsers.push(user)
+    //   this.authorizedUser(user)
+    //   handler()
+    // } else {
+    //   alert('Пользователь с таким email уже зарегистрирован')
+    // }
   },
 
 
@@ -144,17 +200,26 @@ const toggleAuthDom = ()=>{
     userNameElement.textContent = user.displayName
     userAvatarElem.src = user.photo || userAvatarElem.src
     buttonNewPost.classList.add('visible')
+
   } else {
     loginElem.style.display = ''
     userElem.style.display = 'none'
     buttonNewPost.classList.remove('visible')
+    addPostElem.classList.remove('visible')
+    postsWrapper.classList.add('visible')
   }
+}
+
+const showAddPost = () => {
+  addPostElem.classList.add('visible')
+  postsWrapper.classList.remove('visible')
 }
 
 
 
-
 const showAllPosts = () => {
+  addPostElem.classList.remove('visible')
+  postsWrapper.classList.add('visible')
 
   let postsHTML = ''
   setPosts.allPosts.forEach(({title, text, tags, author, date, like, comments})=>{    
@@ -204,7 +269,11 @@ const showAllPosts = () => {
     `
   })
   postsWrapper.innerHTML = postsHTML
+
+  
 }
+
+
 
 const init = () => {
 //события на форме(войти и enter) и на регистрации
@@ -242,13 +311,46 @@ editContainer.addEventListener('submit', event =>{
 // отслеживаем клик по кнопке меню и запускаем функцию 
 menuToggle.addEventListener('click', function (event) {
   // отменяем стандартное поведение ссылки
-  event.preventDefault();
+  event.preventDefault()
   // вешаем класс на меню, когда кликнули по кнопке меню 
-  menu.classList.toggle('visible');
+  menu.classList.toggle('visible')
 })
 
-  showAllPosts()
-  toggleAuthDom()
+buttonNewPost.addEventListener('click', event => {
+  event.preventDefault()
+  showAddPost()
+})
+
+addPostElem.addEventListener('submit', event => {
+  event.preventDefault()
+  console.dir(addPostElem)
+  const { title, text, tags } = addPostElem.elements
+  console.log(title.value);
+
+
+  if(title.value.length<6){
+    alert('Добавьте символы в заголовок')
+    return
+  }
+  if(text.value.length<50){
+    alert('Добавьте символы в текст')
+    return
+  }
+
+
+ 
+ setPosts.addPost(title.value, text.value, tags.value, showAddPost)
+
+ addPostElem.classList.remove('visible')
+ addPostElem.reset()
+ showAllPosts()
+
+})
+setUsers.initUser(toggleAuthDom)
+
+
+  //showAllPosts()
+ 
 }
 
 document.addEventListener('DOMContentLoaded', init)

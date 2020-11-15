@@ -534,9 +534,9 @@ body {
   .sidebar.visible {
     transform: translateX(0);
   }
-  .posts {
+  /* .posts {
     width: 100%;
-  }
+  } */
   .header-nav {
     display: none;
   }
