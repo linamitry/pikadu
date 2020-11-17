@@ -1,22 +1,9 @@
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyAdgKTo3nGsgLmgxRUJDi7k5_c_W_dutbM",
-  authDomain: "pikadu-5839e.firebaseapp.com",
-  databaseURL: "https://pikadu-5839e.firebaseio.com",
-  projectId: "pikadu-5839e",
-  storageBucket: "pikadu-5839e.appspot.com",
-  messagingSenderId: "394524754809",
-  appId: "1:394524754809:web:0c3bd7c87f2d1c3399a5a8"
-};
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-
-
+//const { reset } = require("browser-sync");
 
 let menuToggle = document.querySelector('#menu-toggle');
 let menu = document.querySelector('.sidebar');
 
-const regExpValidEmail = /^\w+@\w+\.\w{2,}$/
+//const regExpValidEmail = /^\w+@\w+\.\w{2,}$/
 
 const loginElem = document.querySelector('.login')
 const loginForm = document.querySelector('.login-form')
@@ -34,161 +21,146 @@ const userAvatarElem = document.querySelector('.user-avatar')
 const postsWrapper = document.querySelector('.posts')
 const buttonNewPost = document.querySelector('.button-new-post')
 const addPostElem = document.querySelector('.add-post')
+const default_photo = userAvatarElem.src
+
+
+const registrationUrl = "http://localhost:8080/api/v1/user/registration";
+const logInUrl = 'http://localhost:8080/api/v1/user/login'
+const editURL = 'http://localhost:8080/api/v1/user'
+const createPostUrl = 'http://localhost:8080/api/v1/post'
+const getPostsUrl = 'http://localhost:8080/api/v1/post?pageNo=0&pageSize=10&sortBy=id'
+
+
+
+//const URL = 'https://jsonplaceholder.typicode.com/users'
 
 
 
 
-const listUsers = [
-  {
-    id: '01',
-    email: 'maks@mail.com',
-    password: '12345',
-    displayName: 'MaksJS'
-  },
-  {
-    id: '02',
-    email: 'lina@mail.com',
-    password: '123456',
-    displayName: 'LinaJS'
-  },
-];
+function sendRequest(method, url, body) {
+  const headers ={
+    'Content-Type': 'application/json'
+  }
+  return fetch(url, {
+    method: method,
+    body: JSON.stringify(body),
+    headers: headers
+  }).then(response => {
+    if(response.ok){
+      return response.json()
+    }else 
+    alert('Позьзователь с такими данными не найден')
+    return response.json().then(error => {
+      const e = new Error('Что-то пошло не так')
+      e.data = error
+      throw e
+    })
+  })
+}
 
+function sendRequest(method, url) {
+  return fetch(url).then(response => {
+    return response.json()
+  })
+}
 
 const setPosts = {
-  allPosts: [
-    {
-      title: 'Заголовок поста',
-      text: 'Далеко-далеко за словесными горами в стране гласных и согласных живут рыбные тексты. Языком что рот маленький реторический вершину текстов обеспечивает гор свой назад решила сбить маленькая дорогу жизни рукопись ему букв деревни предложения, ручеек залетают продолжил парадигматическая? Но языком сих пустился, запятой своего его снова решила меня вопроса моей своих пояс коварный, власти диких правилами напоивший они текстов ipsum первую подпоясал? Лучше, щеке подпоясал приставка большого курсивных на берегу своего? Злых, составитель агентство что вопроса ведущими о решила одна алфавит!',
-      tags: [
-        'свежее', 'новое', 'горячее', 'мое', 'случайность',
-      ],
-      author: {displayName: 'maks', photo: ''},
-      date: '11.11.2020, 20:54:00',
-      like: 34,
-      comments: 54
-    },
-    {
-      title: 'Заголовок поста 2',
-      text: 'Далеко-далеко за словесными горами в стране гласных и согласных живут рыбные тексты. Языком что рот маленький реторический вершину текстов обеспечивает гор свой назад решила сбить маленькая дорогу жизни рукопись ему букв деревни предложения, ручеек залетают продолжил парадигматическая? Но языком сих пустился, запятой своего его снова решила меня вопроса моей своих пояс коварный, власти диких правилами напоивший они текстов ipsum первую подпоясал? Лучше, щеке подпоясал приставка большого курсивных на берегу своего? Злых, составитель агентство что вопроса ведущими о решила одна алфавит!',
-      tags: [
-        'свежее', 'новое', 'мое', 'случайность',
-      ],
-      author: {displayName: 'lina', photo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQt86sQ9Ya33SIwiA1tc4FGlpq1jqhimI_XVw&usqp=CAU'},
-      date: '10.11.2020, 20:54:00',
-      like: 42,
-      comments: 24
-    }
-  ],
+  allPosts: [],
+
   addPost(title,text,tags,handler){
-    this.allPosts.unshift({
+    const post = {
       title,
       text,
       tags: tags.split(',').map(item => item.trim()),
       author: {
+        id: setUsers.user.id,
         displayName: setUsers.user.displayName,
         photo: setUsers.user.photo
       },
       date: new Date().toLocaleString(),
       like: 0,
       comments: 0,
-    })
+    }
+    this.allPosts.unshift(post)
+     sendRequest('POST', createPostUrl, post)
+      .then((data) =>{ 
+        showAllPosts()
+        
 
+      console.log(data)
+        //allPosts.unshift(data)
+      })
+      .catch(err => console.log(err))
+
+  
+  },
+  getPosts(){
+    sendRequest('GET', getPostsUrl)
+      .then(data => {
+        this.allPosts = data.content
+        console.log(this.allPosts)
+        console.log(data.content)
+        showAllPosts()
+
+      })
+      .catch(err => console.log(err))
+
+  }
+  // getPosts(handler) {
+  //   firebase.database().ref('post').on('value', snapshot => {
+  //     this.allPosts = snapshot.val() || []
+  //     handler()
+  //   })
+  // }
+}
+
+
+
+const setUsers = {
+  user: null,
+
+  logIn(user, handler){
+    sendRequest('POST', logInUrl, user)
+      .then(data => {
+        this.user = data
+        if(handler){
+          handler()
+        }
+      })
+      .catch(err => console.log(err))
+      
+  },
+
+  logOut(handler){
+    this.user = null
     if(handler){
       handler()
     }
+  },
+  signUp(email, password){
+    const user = {
+      email: email,
+      password: password
+    }
+    sendRequest('POST', registrationUrl, user)
+      .then(data => console.log(data))
+      .catch(err => console.log(err))
+  },
+
+  editUser(displayName, photo, handler){
+    this.user.displayName=displayName;
+    this.user.photo=photo;
+    console.log(this.user);      
+    sendRequest('PUT', editURL, this.user)
+      .then(data => {
+      console.log(data)
+      this.user = data
+      if(handler){
+        handler()
+      }})
+      .catch(err => console.log(err))
   }
 }
-
-
-
-//setUsers.logIn()
-const setUsers = {
-  user: null,
-  initUser(handler){
-    firebase.auth().onAuthStateChanged(user => {
-      user ? this.user = user : this.user = null
-      if(handler) handler()
-    })
-  },
-  // вход
-  logIn(email, password, handler){
-
-    if(!regExpValidEmail.test(email)) return alert('email не валиден')
-    const user = this.getUser(email)    
-    if(user && user.password === password){
-      this.authorizedUser(user)
-      handler()
-    }else    {
-      alert('Пользователь с такими данными не найден')
-    }
-  },
-
-  // выход
-  logOut(handler){
-
-    console.log('выход')
-    this.user = null
-    handler()
-  },
-
-  //регистрация
-  signUp(email, password, handler){
-
-    if(!regExpValidEmail.test(email)) return alert('email не валиден')
-    if(!email.trim() || !password.trim()){
-      return alert('Введите данные')
-    }
-
-
-    firebase.auth()
-      .createUserWithEmailAndPassword(email, password)
-      .then(data=>{
-        console.log('data: ', data);       
-      })
-      .catch(err=>{
-        const errCode = err.code
-        const errMessage = err.message
-        alert(errMessage)        
-      });
-
-
-
-     
-    // if(!this.getUser(email)){
-    //   const user = {email,password, displayName: email.substring(0, email.indexOf('@'))}
-    //   listUsers.push(user)
-    //   this.authorizedUser(user)
-    //   handler()
-    // } else {
-    //   alert('Пользователь с таким email уже зарегистрирован')
-    // }
-  },
-
-
-
-
-  getUser(email){
-
-    return listUsers.find(item => item.email === email)
-  },
-  authorizedUser(user){
-
-    this.user = user
-  },
-  editUser(userName, userPhoto, handler){
-
-    if(userName){
-      this.user.displayName = userName
-    }
-    if(userPhoto){
-      this.user.photo = userPhoto
-    }
-    handler()
-  }
-}
-
-
-
 
 const toggleAuthDom = ()=>{
   const user = setUsers.user;
@@ -198,7 +170,7 @@ const toggleAuthDom = ()=>{
     loginElem.style.display = 'none'
     userElem.style.display = ''
     userNameElement.textContent = user.displayName
-    userAvatarElem.src = user.photo || userAvatarElem.src
+    userAvatarElem.src = user.photo || default_photo
     buttonNewPost.classList.add('visible')
 
   } else {
@@ -215,12 +187,7 @@ const showAddPost = () => {
   postsWrapper.classList.remove('visible')
 }
 
-
-
 const showAllPosts = () => {
-  addPostElem.classList.remove('visible')
-  postsWrapper.classList.add('visible')
-
   let postsHTML = ''
   setPosts.allPosts.forEach(({title, text, tags, author, date, like, comments})=>{    
     postsHTML += `
@@ -270,24 +237,26 @@ const showAllPosts = () => {
   })
   postsWrapper.innerHTML = postsHTML
 
-  
+  addPostElem.classList.remove('visible')
+  postsWrapper.classList.add('visible')
 }
 
 
-
 const init = () => {
-//события на форме(войти и enter) и на регистрации
-//addEventListener вместо onclick (отменять removeEventListener)
-//submit type
+
 loginForm.addEventListener('submit', (event) => {
   event.preventDefault()//изменить поведение браузера по умолчанию
-  setUsers.logIn(emailInput.value, passwordInput.value, toggleAuthDom)
+  const user = {
+    email: emailInput.value,
+    password: passwordInput.value
+  }
+  setUsers.logIn(user, toggleAuthDom)
   loginForm.reset()
 })
 
 loginSignUp.addEventListener('click', (event) => {
   event.preventDefault()
-  setUsers.signUp(emailInput.value, passwordInput.value, toggleAuthDom)
+  setUsers.signUp(emailInput.value, passwordInput.value)
   loginForm.reset()
 })
 
@@ -308,11 +277,8 @@ editContainer.addEventListener('submit', event =>{
   editContainer.classList.remove('visible')
 })
 
-// отслеживаем клик по кнопке меню и запускаем функцию 
 menuToggle.addEventListener('click', function (event) {
-  // отменяем стандартное поведение ссылки
   event.preventDefault()
-  // вешаем класс на меню, когда кликнули по кнопке меню 
   menu.classList.toggle('visible')
 })
 
@@ -327,45 +293,24 @@ addPostElem.addEventListener('submit', event => {
   const { title, text, tags } = addPostElem.elements
   console.log(title.value);
 
-
   if(title.value.length<6){
     alert('Добавьте символы в заголовок')
     return
   }
-  if(text.value.length<50){
+  if(text.value.length<6){
     alert('Добавьте символы в текст')
     return
   }
-
-
  
  setPosts.addPost(title.value, text.value, tags.value, showAddPost)
 
  addPostElem.classList.remove('visible')
  addPostElem.reset()
- showAllPosts()
-
 })
-setUsers.initUser(toggleAuthDom)
 
+toggleAuthDom()
+showAllPosts()
 
-  //showAllPosts()
- 
 }
 
 document.addEventListener('DOMContentLoaded', init)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

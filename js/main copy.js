@@ -1,9 +1,22 @@
-//const { reset } = require("browser-sync");
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyAdgKTo3nGsgLmgxRUJDi7k5_c_W_dutbM",
+  authDomain: "pikadu-5839e.firebaseapp.com",
+  databaseURL: "https://pikadu-5839e.firebaseio.com",
+  projectId: "pikadu-5839e",
+  storageBucket: "pikadu-5839e.appspot.com",
+  messagingSenderId: "394524754809",
+  appId: "1:394524754809:web:0c3bd7c87f2d1c3399a5a8"
+};
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+
+
 
 let menuToggle = document.querySelector('#menu-toggle');
 let menu = document.querySelector('.sidebar');
 
-//const regExpValidEmail = /^\w+@\w+\.\w{2,}$/
+const regExpValidEmail = /^\w+@\w+\.\w{2,}$/
 
 const loginElem = document.querySelector('.login')
 const loginForm = document.querySelector('.login-form')
@@ -26,136 +39,140 @@ const default_photo = userAvatarElem.src
 
 const registrationUrl = "http://localhost:8080/api/v1/user/registration";
 const logInUrl = 'http://localhost:8080/api/v1/user/login'
-const editURL = 'http://localhost:8080/api/v1/user'
-const createPostUrl = 'http://localhost:8080/api/v1/post'
-const getPostsUrl = 'http://localhost:8080/api/v1/post?pageNo=0&pageSize=50&sortBy=date'
 
 
-
-//const URL = 'https://jsonplaceholder.typicode.com/users'
-
-
-
-
-function sendRequest(method, url, body) {
-  const headers ={
-    'Content-Type': 'application/json'
-  }
-  return fetch(url, {
-    method: method,
-    body: JSON.stringify(body),
-    headers: headers
-  }).then(response => {
-    if(response.ok){
-      return response.json()
-    }else 
-    alert('Позьзователь с такими данными не найден')
-    return response.json().then(error => {
-      const e = new Error('Что-то пошло не так')
-      e.data = error
-      throw e
-    })
-  })
-}
-
-function sendRequestGet(url) {
-  return fetch(url).then(response => {
-    return response.json()
-  })
-}
 
 const setPosts = {
   allPosts: [],
 
   addPost(title,text,tags,handler){
-    const post = {
+    const user = firebase.auth().currentUser
+    this.allPosts.unshift({
+      id: `postID${(+new Date()).toString(16)}-${user.uid}`,
       title,
       text,
       tags: tags.split(',').map(item => item.trim()),
       author: {
-        id: setUsers.user.id,
         displayName: setUsers.user.displayName,
-        photo: setUsers.user.photo
+        photo: setUsers.user.photoURL
       },
       date: new Date().toLocaleString(),
-      likes: 0,
+      like: 0,
       comments: 0,
-    }
-    this.allPosts.unshift(post)
-     sendRequest('POST', createPostUrl, post)
-      .then((data) =>{ 
-      this.getPosts(handler)
-        
-
-      console.log(data)
-        //allPosts.unshift(data)
-      })
-      .catch(err => console.log(err))
-
-  
+    })
+  firebase.database().ref('post').set(this.allPosts)
+  .then(() => this.getPosts(handler))
   },
-  getPosts(handler){
-    sendRequestGet(getPostsUrl)
-      .then(data => {
-        this.allPosts = data.content
-        console.log(this.allPosts)
-        console.log(data.content)
-        handler()
-
-      })
-      .catch(err => console.log(err))
-
+  getPosts(handler) {
+    firebase.database().ref('post').on('value', snapshot => {
+      this.allPosts = snapshot.val() || []
+      handler()
+    })
   }
-
 }
-
-
 
 const setUsers = {
   user: null,
+  
+  initUser(handler){
+   
+   
+   
+    // firebase.auth().onAuthStateChanged(user => {
+    //   if(user) {
+    //     this.user = user
+    //   } else {
+    //     this.user = null
+    //   }
 
-  logIn(user, handler){
-    sendRequest('POST', logInUrl, user)
-      .then(data => {
-        this.user = data
-        if(handler){
-          handler()
-        }
-      })
-      .catch(err => console.log(err))
-      
-  },
 
-  logOut(handler){
-    this.user = null
-    if(handler){
-      handler()
-    }
+      if(handler) {
+        handler()
+      }
+    
+
   },
-  signUp(email, password){
-    const user = {
+  
+  logIn(email, password, handler){
+    const request = new XMLHttpRequest();
+    request.responseType =	"json";    
+    let user = {
       email: email,
       password: password
     }
-    sendRequest('POST', registrationUrl, user)
-      .then(data => console.log(data))
-      .catch(err => console.log(err))
+    request.open("POST", logInUrl, true);
+    request.setRequestHeader("Content-type", "application/json");
+    request.addEventListener("readystatechange", () => {
+      if (request.readyState === 4 && request.status === 200) {
+          let obj = request.response;   
+    }
+      });
+ 
+  request.send(JSON.stringify(user))
+  console.log('user: ', user);
+  console.log(typeof(user));
   },
 
-  editUser(displayName, photo, handler){
-    this.user.displayName=displayName;
-    this.user.photo=photo;
-    console.log(this.user);      
-    sendRequest('PUT', editURL, this.user)
-      .then(data => {
-      console.log(data)
-      this.user = data
-      if(handler){
-        handler()
-      }})
-      .catch(err => console.log(err))
+  logOut(){
+    firebase.auth().signOut()
+  },
+  
+  signUp(email, password){const request = new XMLHttpRequest();
+    request.responseType =	"json";    
+    let user = {
+      email: email,
+      password: password
+    }
+    request.open("POST", registrationUrl, true);
+    request.setRequestHeader("Content-type", "application/json");
+    request.addEventListener("readystatechange", () => {
+      if (request.readyState === 4 && request.status === 200) {
+          let obj = request.response;   
+    }
+      });
+ 
+  request.send(JSON.stringify(user))
+  console.log('user: ', user);
+  console.log(typeof(user));
+  },
+
+//TODO:переделать чтобы св-во фото не вызывалось, если не передано
+  editUser(displayName, photoURL, handler){
+    const user = firebase.auth().currentUser
+    if(displayName){
+      if(photoURL){
+        user.updateProfile({
+          displayName,
+          photoURL
+        }).then(handler)
+      } else{
+      user.updateProfile({
+        displayName
+      }).then(handler)
+    }
+  }
+  }, 
+
+  sendForget(email){
+    firebase.auth().sendPasswordResetEmail(email)
+      .then(() => {
+        alert('Письмо отправлено')
+      })
+      .catch(err => {
+        console.log(err)
+      })
   }
 }
+
+const loginForget = document.querySelector('.login-forget')
+
+loginForget.addEventListener('click', event =>{
+  event.preventDefault()
+
+  setUsers.sendForget(emailInput.value)
+  emailInput.value = ''
+})
+
 
 const toggleAuthDom = ()=>{
   const user = setUsers.user;
@@ -165,7 +182,7 @@ const toggleAuthDom = ()=>{
     loginElem.style.display = 'none'
     userElem.style.display = ''
     userNameElement.textContent = user.displayName
-    userAvatarElem.src = user.photo || default_photo
+    userAvatarElem.src = user.photoURL || default_photo
     buttonNewPost.classList.add('visible')
 
   } else {
@@ -184,7 +201,7 @@ const showAddPost = () => {
 
 const showAllPosts = () => {
   let postsHTML = ''
-  setPosts.allPosts.forEach(({title, text, tags, author, date, likes, comments})=>{    
+  setPosts.allPosts.forEach(({title, text, tags, author, date, like, comments})=>{    
     postsHTML += `
     <section class="post">
     <div class="post-body">
@@ -200,7 +217,7 @@ const showAllPosts = () => {
           <svg width="19" height="20" class="icon icon-like">
             <use xlink:href="img/icons.svg#like"></use>
           </svg>
-          <span class="likes-counter">${likes}</span>
+          <span class="likes-counter">${like}</span>
         </button>
         <button class="post-button comments">
           <svg width="21" height="21" class="icon icon-comment">
@@ -237,27 +254,27 @@ const showAllPosts = () => {
 }
 
 
-const init = () => {
 
+const init = () => {
 loginForm.addEventListener('submit', (event) => {
   event.preventDefault()//изменить поведение браузера по умолчанию
-  const user = {
-    email: emailInput.value,
-    password: passwordInput.value
-  }
-  setUsers.logIn(user, toggleAuthDom)
+  setUsers.logIn(emailInput.value, passwordInput.value, toggleAuthDom)
   loginForm.reset()
 })
 
 loginSignUp.addEventListener('click', (event) => {
   event.preventDefault()
   setUsers.signUp(emailInput.value, passwordInput.value)
-  loginForm.reset()
 })
+// loginSignUp.addEventListener('click', (event) => {
+//   event.preventDefault()
+//   setUsers.signUp(emailInput.value, passwordInput.value, toggleAuthDom)
+//   loginForm.reset()
+// })
 
 exitElem.addEventListener('click',event=>{
   event.preventDefault()
-  setUsers.logOut(toggleAuthDom)
+  setUsers.logOut()
 })
 
 editElem.addEventListener('click', event =>{
@@ -292,21 +309,18 @@ addPostElem.addEventListener('submit', event => {
     alert('Добавьте символы в заголовок')
     return
   }
-  if(text.value.length<6){
+  if(text.value.length<50){
     alert('Добавьте символы в текст')
     return
   }
  
- setPosts.addPost(title.value, text.value, tags.value, showAllPosts)
+ setPosts.addPost(title.value, text.value, tags.value, showAddPost)
 
  addPostElem.classList.remove('visible')
  addPostElem.reset()
 })
-
-toggleAuthDom()
 setPosts.getPosts(showAllPosts)
-//showAllPosts()
-
+setUsers.initUser(toggleAuthDom)
 }
 
 document.addEventListener('DOMContentLoaded', init)
